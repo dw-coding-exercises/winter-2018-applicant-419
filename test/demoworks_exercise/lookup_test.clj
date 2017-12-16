@@ -19,3 +19,12 @@
     (testing "Can we parse one OCDEntry into a correct, single string?"
       (let [expected-single-string (str expected-state "," expected-city "," expected-county)]
         (is (= expected-single-string (sut/render-ocds good-entry)) "Is our rendered full string as we'd expect?")))))
+
+;; TODO: I probably wont have time, but mocking out HTTP requests to be sure
+;; they're rock-solid would be a very good thing to do.
+(deftest request-tests
+  (let [good-edn "{:hi 5}"
+        bad-edn  "{:hi"]
+    (testing "Can we parse EDN, returning it if so, quietly logging and nil-ing if not?"
+      (is (= {:hi 5} (sut/read-body good-edn)))
+      (is (= nil (sut/read-body bad-edn))))))
