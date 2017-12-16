@@ -1,0 +1,20 @@
+* Lessee
+
+Everything marked ~BACKLOG~ is an "if I have time" item.
+
+** DONE Logging (gonna need a clearer picture of that which it is which is up)
+** TODO Make lookup requests
+** TODO Route for handling lookup
+Let's do this
+** TODO A view for displaying results
+Needs at minimum to
+
+1. [ ] Show the results of the lookup
+2. [ ] Either [0/2]
+   1. [ ] allow another search right there, or
+   2. [ ] link back home
+
+Ideally, given enough time:
+1. [ ] Format things in a pleasing, human-readable way (not just pprinting EDN)
+
+** BACKLOG Augment lookup params sensibly

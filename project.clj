@@ -8,6 +8,7 @@
                  [hiccup "1.0.5"]
                  [com.taoensso/timbre "4.10.0"]
                  [clj-time "0.14.2"]
+                 [clj-http "3.7.0"]]
   :plugins [[lein-ring "0.12.1"]]
   :ring {:handler demoworks-exercise.core/handler}
   :aliases {"submit" ["run" "-m" "demoworks-exercise.submit"]})
