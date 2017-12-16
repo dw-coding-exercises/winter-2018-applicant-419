@@ -1,9 +1,11 @@
 (ns demoworks-exercise.core
   (:require [compojure.core :refer :all]
             [compojure.route :as route]
-            [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
+            [demoworks-exercise.home :as home]
+            demoworks-exercise.logging
+            [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
             [ring.middleware.reload :refer [wrap-reload]]
-            [demoworks-exercise.home :as home]))
+            [taoensso.timbre :as log]))
 
 (defroutes app
   (GET "/" [] home/page)
@@ -14,3 +16,5 @@
   (-> app
       (wrap-defaults site-defaults)
       wrap-reload))
+
+(log/info "We're up!")
