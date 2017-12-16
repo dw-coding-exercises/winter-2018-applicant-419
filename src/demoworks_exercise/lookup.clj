@@ -78,3 +78,29 @@
     (edn/read-string response-body)
     (catch java.lang.RuntimeException rte
       (log/error "Couldn't parse response body:" response-body))))
+;;------------------------Looking Things Up, For Realz--------------------------
+;; The function we'll hand to our Compojure routes, back in core.clj
+
+(defn lookup
+  "Do a lookup! Hopefully. If it fails, be polite about it.
+
+  Remember: form params are already parsed into a map with strings for keys, so
+  we can't destructure this one."
+  [form-params]
+  (log/debug "Parsing lookup request for:" form-params)
+  ;; TODO: This is where we start augmenting
+  (let [ocd-entry (parse-form-params-to-entry form-params)
+        response  (query-api ocd-entry query-endpoint)
+        ;; Alias this so we can use it in more than one place
+        nf        #(not-found % street (form-params form-street-two-key) city state zip)]
+    ;; Make sure we check common status ailments
+    ;; TODO: check statuses a lot more thoroughly
+    (case (:status response)
+      200 (if-let [parsed-edn (read-body (:body response))]
+            (if (empty? parsed-edn)
+              (nf "No upcoming elections for this location.")
+              (do
+                (log/info "Got some stuff! Showing it to the user:")
+                (html5
+                 [:div parsed-edn]))))
+      (nf "The API returned a non-200 status code for this query:"))))
