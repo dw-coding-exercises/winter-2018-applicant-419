@@ -78,6 +78,101 @@
     (edn/read-string response-body)
     (catch java.lang.RuntimeException rte
       (log/error "Couldn't parse response body:" response-body))))
+
+;;-------------------------Rendering things for Humans---------------------------
+;; Gotta show people something!
+
+;; TODO: refactor out duplicated pieces as makes sense
+;; TODO: all of this can be tested to assure it renders well, but I am running low on time.
+
+;; AHEM I'll just copy paste this shall I
+(defn header []
+  [:head
+   [:meta {:charset "UTF-8"}]
+   [:meta {:name "viewport"
+           :content "width=device-width, initial-scale=1.0, maximum-scale=1.0"}]
+   [:title "Find my next election"]
+   [:link {:rel "stylesheet" :href "default.css"}]])
+
+(defn render-voting-method [voting-method]
+  [:div
+   [:p (str "This " (if (:primary voting-method) "is" "is not") " a primary election.")]
+   (case (:type voting-method)
+     :in-person [:p (:instructions voting-method)]
+     :by-mail [:p (str "For by-mail voting, your ballot request must be received by "
+                       (format-dt (:ballot-request-deadline-received voting-method)))])])
+
+(defn render-voting-methods [voting-methods]
+  [:div (for [vm voting-methods]
+          (render-voting-method vm))])
+
+(defn render-voter-registration-instructions
+  "Conditionally return those instruction keys I know of so far."
+  [instructions]
+  (for [k [:registration :signature :idnumber]]
+    (if-let [v (instructions k)]
+      [:p v])))
+
+(defn render-voter-registration-method [vrm]
+  [:div (str "For " (name (:type vrm)) " voting:")
+   (render-voter-registration-instructions (:instructions vrm))
+   (if-let [website (:url vrm)]
+     [:p (str "Official website: " website)])
+   (if-let [dt (:deadline-postmarked vrm)]
+     [:p (str "Registration must be postmarked by " (format-dt dt))])])
+
+(defn render-voter-registration-methods [voter-registration-methods]
+  [:div
+   [:p "To register to vote, you can use these methods:"]
+   (for [vrm voter-registration-methods]
+     (render-voter-registration-method vrm))])
+
+(defn render-district-division [{:keys [voting-methods voter-registration-methods] :as division}]
+  [:div
+   [:p (str "This is a " (name (:election-authority-level division)) " election.")]
+   (render-voting-methods voting-methods)
+   (render-voter-registration-methods voter-registration-methods)])
+
+(defn render-district-divisions [divisions]
+  [:div
+   (for [divis divisions]
+     (render-district-division divis))])
+
+(defn render-election [election]
+  (log/debug election)
+  (log/debug (type election))
+  (log/debug (:description election))
+  (log/debug (:website election))
+  (log/debug (:date election))
+  (let [{:keys [description website date]} election
+        divisions (:district-divisions election)]
+    [:div
+     [:h1 description]
+     [:h3 (str "To be held on: " (format-dt date))]
+     [:h3 (str "Official website: " website)]
+     (render-district-divisions divisions)]))
+
+(defn render-elections [elections]
+  (for [election elections] (render-election election)))
+
+(defn render-results
+  "Render upcoming elections into something a real human might ever be able to
+  read :P"
+  [query-result]
+  (html5
+   (header)
+   (render-elections query-result)
+   ))
+
+(defn not-found [msg ocd-entry]
+  (log/debug "Not found it. Blah. Telling the user about it.")
+  (html5 [:div msg
+          [:ul
+           [:li (:street ocd-entry)]
+           [:li (:place ocd-entry)]
+           [:li (:state ocd-entry)]
+           [:li (:zip ocd-entry)]]]))
+
 ;;------------------------Looking Things Up, For Realz--------------------------
 ;; The function we'll hand to our Compojure routes, back in core.clj
 
@@ -90,17 +185,15 @@
   (log/debug "Parsing lookup request for:" form-params)
   ;; TODO: This is where we start augmenting
   (let [ocd-entry (parse-form-params-to-entry form-params)
-        response  (query-api ocd-entry query-endpoint)
-        ;; Alias this so we can use it in more than one place
-        nf        #(not-found % street (form-params form-street-two-key) city state zip)]
+        response  (query-api ocd-entry query-endpoint)]
+
     ;; Make sure we check common status ailments
     ;; TODO: check statuses a lot more thoroughly
     (case (:status response)
       200 (if-let [parsed-edn (read-body (:body response))]
             (if (empty? parsed-edn)
-              (nf "No upcoming elections for this location.")
+              (not-found "No upcoming elections for this location.")
               (do
                 (log/info "Got some stuff! Showing it to the user:")
-                (html5
-                 [:div parsed-edn]))))
-      (nf "The API returned a non-200 status code for this query:"))))
+                (render-results parsed-edn))))
+      (not-found "The API returned a non-200 status code for this query:" ocd-entry))))
