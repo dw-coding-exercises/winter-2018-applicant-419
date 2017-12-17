@@ -65,6 +65,23 @@
     (str/join "," ocd-strings)))
 
 ;;----------------------------------Requests------------------------------------
+;; Including parsing request data into something we can used
+(defn clean-city-name
+  "Take a city name, make it lower case, and replace spaces with underbars"
+  [city-name]
+  (-> city-name
+      (str/lower-case)
+      (str/replace " " "_")))
+
+(defn parse-form-params-to-entry
+  "Convert incoming form data to an OCDEntry, cleaning up fields as needed along
+  the way."
+  [form-params]
+  (let [street (form-params form-street-one-key)
+        city   (clean-city-name (form-params form-city-key))
+        state  (str/lower-case (form-params form-state-key))
+        zip    (form-params form-zipcode-key)]
+    (->OCDEntry street city state zip nil nil)))
 
 (defn query-api
   "Talk to the TurboVote API; returns the entire response for downstream processing.
