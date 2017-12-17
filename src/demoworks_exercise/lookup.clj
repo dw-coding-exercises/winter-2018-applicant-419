@@ -41,12 +41,9 @@
 
 ;;------------------------------------Data--------------------------------------
 ;; Who doesn't love a consistently-shaped request?
-;; TODO: Remember to render BOTH state and "more precise" (e.g. place) OCDs
 
 (defrecord OCDEntry [street place state zip county district])
 
-;; Do I want this?
-;; {:keys [street city state zip country district]}
 (defn render-ocd
   "Render a single OCD to a correctly formatted lookup string"
   [ocd-entry key-order]
