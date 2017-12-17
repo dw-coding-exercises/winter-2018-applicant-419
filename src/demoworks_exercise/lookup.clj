@@ -26,6 +26,19 @@
 (def county-keys   [:state :county])
 (def known-formats [state-keys city-keys])
 
+;; Form key values; give 'em a consistent place to update in case they change
+(def form-state-key "state")
+(def form-city-key "city")
+(def form-street-one-key "street")
+(def form-street-two-key "street-2")
+(def form-zipcode-key "zip")
+
+;;----------------------------------Datetimes------------------------------------
+(defn format-dt
+  "Format an instance of datetime as a nice string."
+  [dt]
+  (f/unparse (f/formatters :date-time) (c/from-date dt)))
+
 ;;------------------------------------Data--------------------------------------
 ;; Who doesn't love a consistently-shaped request?
 ;; TODO: Remember to render BOTH state and "more precise" (e.g. place) OCDs
