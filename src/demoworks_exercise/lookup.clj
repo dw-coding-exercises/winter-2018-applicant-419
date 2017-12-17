@@ -24,7 +24,7 @@
 (def state-keys    [:state])
 (def city-keys     [:state :place])
 (def county-keys   [:state :county])
-(def known-formats [state-keys city-keys county-keys])
+(def known-formats [state-keys city-keys])
 
 ;;------------------------------------Data--------------------------------------
 ;; Who doesn't love a consistently-shaped request?
