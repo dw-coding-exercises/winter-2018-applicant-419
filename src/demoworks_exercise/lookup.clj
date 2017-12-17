@@ -67,13 +67,19 @@
 ;;----------------------------------Requests------------------------------------
 
 (defn query-api
+  "Talk to the TurboVote API; returns the entire response for downstream processing.
+
+  Like-a dis:
+  https://api.turbovote.org/elections/upcoming?district-divisions=ocd-division/country:us/state:al,ocd-division/country:us/state:al/place:birmingham'"
   [ocd-entry endpoint]
+  (log/debug "Attempting API lookup on:" ocd-entry)
   (let [rendered-ocd (render-ocds ocd-entry)
-        params       {"district-divisions" render-ocd}
+        params       {"district-divisions" rendered-ocd}
         ;; There is every possibility that this is YAGNI, but it makes me feel
         ;; better about forward flexibility to admit we might query something
         ;; different eventually
         url          (str/join "/" [api-root endpoint])]
+    (log/debug "Querying for OCD string:" rendered-ocd)
     (http/get url {:query-params params})))
 
 
