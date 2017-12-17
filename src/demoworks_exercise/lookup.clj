@@ -1,11 +1,11 @@
 (ns demoworks-exercise.lookup
   (:require [clj-http.client :as http]
+            [clj-time.coerce :as c]
+            [clj-time.format :as f]
             [clojure.edn :as edn]
             [clojure.string :as str]
+            [hiccup.page :refer [html5]]
             [taoensso.timbre :as log]))
-
-;; Like-a dis:
-;; https://api.turbovote.org/elections/upcoming?district-divisions=ocd-division/country:us/state:al,ocd-division/country:us/state:al/place:birmingham'
 
 ;;----------------------------------Constants------------------------------------
 (def api-root "https://api.turbovote.org")
@@ -101,7 +101,6 @@
 
 
 ;;-------------------------------Result Parsing---------------------------------
-
 ;; Design grump: oye can chasing down nils be a pain. With more time, I'd prefer
 ;; some kind of error object this could return -- something more like an Either.
 (defn read-body
