@@ -27,4 +27,14 @@
         bad-edn  "{:hi"]
     (testing "Can we parse EDN, returning it if so, quietly logging and nil-ing if not?"
       (is (= {:hi 5} (sut/read-body good-edn)))
-      (is (= nil (sut/read-body bad-edn))))))
+      (is (= nil (sut/read-body bad-edn)))))
+
+  (testing "Can we clean up incoming data correctly?"
+    (is (= "los_angeles" (sut/clean-city-name "Los Angeles"))))
+
+  (testing "Can we parse form data into something we can use?"
+    (let [form-params {"__anti-forgery-token" "M09AMWMDlk/Rx5A/gUD7s9DH3PrMX7Jt25DNTZ+vZV1dzJD4zqWqqIWf7GyH7QBVKgAOfVHOMG1dxNvI", "street" "1234 Place St", "street-2" "", "city" "City", "state" "CA", "zip" "12345"}
+          expected-entry (sut/->OCDEntry "1234 Place St" "city" "ca" "12345" nil nil)]
+      (is (= expected-entry (sut/parse-form-params-to-entry form-params)))))
+
+  )
