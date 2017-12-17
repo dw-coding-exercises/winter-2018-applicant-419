@@ -171,11 +171,6 @@
      (render-district-division divis))])
 
 (defn render-election [election]
-  (log/debug election)
-  (log/debug (type election))
-  (log/debug (:description election))
-  (log/debug (:website election))
-  (log/debug (:date election))
   (let [{:keys [description website date]} election
         divisions (:district-divisions election)]
     [:div
